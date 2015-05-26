@@ -1,0 +1,6 @@
+check process webapp
+  with pidfile /var/vcap/sys/run/webapp/httpd.pid
+  start program "/var/vcap/jobs/webapp/bin/webapp_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/webapp/bin/webapp_ctl stop" with timeout 60 seconds
+  group vcap
+

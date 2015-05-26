@@ -1,0 +1,59 @@
+name: webapp-warden
+director_uuid: <%= `bosh status --uuid` %>
+
+releases:
+- name: webapp
+  version: latest
+
+compilation:
+  workers: 2
+  network: webapp-network
+  reuse_compilation_vms: true
+  cloud_properties:
+    name: random
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-240000
+  update_watch_time: 30000-600000
+  max_in_flight: 3
+
+resource_pools:
+- name: common-resource-pool
+  network: webapp-network
+  size: 3
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+  cloud_properties:
+    name: random
+
+networks:
+- name: webapp-network
+  subnets:
+  - range: 10.244.1.0/24
+    reserverd: 
+      - 10.244.1.0
+      - 10.244.1.255
+      - 10.244.1.1
+    static:
+      - 10.244.1.14
+
+    cloud_properties:
+      name: random
+
+jobs:
+- name: webapp
+  template: webapp
+  instances: 1
+  resource_pool: common-resource-pool
+  networks:
+    - name: webapp-network
+      static_ips:
+        - 10.244.1.14
+
+properties:
+  webapp:
+    admin: foo@bar.com
+    servername: 10.244.1.14
+

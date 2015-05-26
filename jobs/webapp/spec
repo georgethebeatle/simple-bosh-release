@@ -1,0 +1,21 @@
+---
+name: webapp
+
+templates:
+  webapp_ctl.erb:  bin/webapp_ctl
+  httpd.conf.erb: config/httpd.conf
+
+packages:
+  - apache2
+
+properties:
+  webapp.port:
+    description: TCP port webapp server listen on
+    default: 8080
+  webapp.admin:
+    description: Email address of server administrator
+    default: webmaster@example.com
+  webapp.servername:
+    description: Name of the virtual server
+    default: 127.0.0.1
+

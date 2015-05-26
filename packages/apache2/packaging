@@ -1,0 +1,16 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+echo "Extracting apache httpd..."
+tar xzf apache2/httpd-2.2.29.tar.gz
+
+echo "Building apache httpd..."
+(
+    cd httpd-2.2.29
+    ./configure \
+    --prefix=${BOSH_INSTALL_TARGET} \
+    --enable-so
+    make
+    make install
+)
+
