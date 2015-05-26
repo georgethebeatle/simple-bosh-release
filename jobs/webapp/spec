@@ -11,7 +11,7 @@ packages:
 properties:
   webapp.port:
     description: TCP port webapp server listen on
-    default: 8080
+    default: 80
   webapp.admin:
     description: Email address of server administrator
     default: webmaster@example.com

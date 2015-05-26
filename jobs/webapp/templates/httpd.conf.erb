@@ -28,7 +28,7 @@
 #
 ServerRoot "/var/vcap/packages/apache2"
 
-PidFile "/var/vcap/sys/run/apache2/httpd.pid"
+PidFile "/var/vcap/sys/run/webapp/httpd.pid"
 
 #
 # Listen: Allows you to bind Apache to specific IP addresses and/or
@@ -52,11 +52,11 @@ Listen <%= p("webapp.port") %>
 #
 # Example:
 # LoadModule foo_module modules/mod_foo.so
-LoadModule php5_module        modules/libphp5.so
+# LoadModule php5_module        modules/libphp5.so
 #
-<FilesMatch \.php$>
-    SetHandler application/x-httpd-php
-</FilesMatch>
+# <FilesMatch \.php$>
+#     SetHandler application/x-httpd-php
+# </FilesMatch>
 
 <IfModule !mpm_netware_module>
 <IfModule !mpm_winnt_module>
@@ -108,7 +108,7 @@ ServerName <%= p("webapp.servername") %>
 # documents. By default, all requests are taken from this directory, but
 # symbolic links and aliases may be used to point to other locations.
 #
-DocumentRoot "/var/vcap/packages/webapp"
+DocumentRoot "/var/vcap/packages/apache2/htdocs"
 
 #
 # Each directory to which Apache has access can be configured with respect
@@ -135,7 +135,7 @@ DocumentRoot "/var/vcap/packages/webapp"
 #
 # This should be changed to whatever you set DocumentRoot to.
 #
-<Directory "/var/vcap/packages/webapp">
+<Directory "/var/vcap/packages/apache2/htdocs">
     #
     # Possible values for the Options directive are "None", "All",
     # or any combination of:
@@ -190,7 +190,7 @@ DocumentRoot "/var/vcap/packages/webapp"
 # logged here.  If you *do* define an error logfile for a <VirtualHost>
 # container, that host's errors will be logged there and not here.
 #
-ErrorLog "/var/vcap/sys/log/apache2/error_log"
+ErrorLog "/var/vcap/sys/log/webapp/error_log"
 
 #
 # LogLevel: Control the number of messages logged to the error_log.
@@ -219,7 +219,7 @@ LogLevel warn
     # define per-<VirtualHost> access logfiles, transactions will be
     # logged therein and *not* in this file.
     #
-    CustomLog "/var/vcap/sys/log/apache2/access_log" common
+    CustomLog "/var/vcap/sys/log/webapp/access_log" common
 
     #
     # If you prefer a logfile with access, agent, and referer information

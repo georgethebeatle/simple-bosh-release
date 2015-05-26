@@ -30,14 +30,15 @@ resource_pools:
 
 networks:
 - name: webapp-network
+  type: manual
   subnets:
-  - range: 10.244.1.0/24
+  - range: 10.244.2.0/24
     reserverd: 
-      - 10.244.1.0
-      - 10.244.1.255
-      - 10.244.1.1
+      - 10.244.2.0
+      - 10.244.2.255
+      - 10.244.2.1
     static:
-      - 10.244.1.14
+      - 10.244.2.14
 
     cloud_properties:
       name: random
@@ -50,10 +51,10 @@ jobs:
   networks:
     - name: webapp-network
       static_ips:
-        - 10.244.1.14
+        - 10.244.2.14
 
 properties:
   webapp:
     admin: foo@bar.com
-    servername: 10.244.1.14
+    servername: 10.244.2.14
 
