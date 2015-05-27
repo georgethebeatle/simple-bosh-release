@@ -145,6 +145,82 @@ echo "Building apache httpd..."
 It extracts the sources, configures and compiles, giving a custom install location - the `$BOSH_INSTALL_TARGET`. This is preset by bosh and it is some path on the filesystem of the VM (or container) being provisioned. For our package it will most likely be `/var/vcap/packages/apache2`
 
 ### Add the job
+
+At this point we have the apache httpd server available as a package, which means that bosh knows where to get the sources from and how to compile it, but we still haven't run it, and a server that is not running is generally no good.
+
+Thing that run are usually described as `jobs` in bosh terms. So if we want to run the server we will have to defne a job that knows how to configure and run it. 
+
+First let's generate an empty one:
+
+```
+$ bosh generate job webapp
+create  jobs/webapp
+create  jobs/webapp/templates
+create  jobs/webapp/spec
+create  jobs/webapp/monit
+```
+
+Every job has:
+- some `properties` through which it can be customized
+- some `templates` - these are simple `erb` templates that bosh instantiates with the job properties 
+- a `spec` that lists the used packages, the `templates` and the `properties`
+
+Our webapp job will be simply the apache `httpd` server serving some static content from some local `DocumentRoot`. So we will need the following templates: 
+- `webapp_ctl.erb` - for starting and stopping the server
+- `httpd.conf.erb` - for configuring the server 
+- `index.html.erb` - for the html content that the server is going to serve
+
+We may want to define properties for the port on which the server is going to listen for requests, the email of the webmaster, the server address and the content of the welcome html page.
+
+So we may end up with a `spec` like this:
+
+```
+---
+name: webapp
+
+templates:
+  webapp_ctl.erb: bin/webapp_ctl
+  httpd.conf.erb: config/httpd.conf
+  index.html.erb: htdocs/index.html
+
+packages:
+  - apache2
+
+properties:
+  webapp.port:
+    description: TCP port webapp server listen on
+    default: 80
+  webapp.admin:
+    description: Email address of server administrator
+    default: webmaster@example.com
+  webapp.servername:
+    description: Name of the virtual server
+    default: 127.0.0.1
+  webapp.greeting:
+    description: Message that will be displayed by the deployed app
+    default: Hello, world!
+
+```
+
+We are declaring that we will be using the `apache2` package and we are listing all our templates providing the paths where bosh will place them after instantiating. These paths are relative to the jobs dir on the system being installed. Usually this is `/var/vcap/jobs/webapp`.
+
+For tha sake of clarity I won't paste the actual content of the templates in this README. You can find them [here](jobs/webapp/templates). Have a look at them and copy them in your `jobs/webapp/templates` folder.
+
+Bosh is using [monit](https://mmonit.com/monit) for monitoring the processes it runs. So the last bit we need to provide is a monit config file for the job.
+
+It looks like this
+
+```
+check process webapp
+  with pidfile /var/vcap/sys/run/webapp/httpd.pid
+  start program "/var/vcap/jobs/webapp/bin/webapp_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/webapp/bin/webapp_ctl stop" with timeout 60 seconds
+  group vcap
+
+```
+
+It tells monit what pid to watch for and it also points to the `webapp_ctl` script taht we created for lifecycle management of the server.
+
 ### Describe your deployment
 
 ## Pull the trigger
