@@ -6,7 +6,7 @@ releases:
   version: latest
 
 compilation:
-  workers: 2
+  workers: 1
   network: webapp-network
   reuse_compilation_vms: true
   cloud_properties:
@@ -21,7 +21,7 @@ update:
 resource_pools:
 - name: common-resource-pool
   network: webapp-network
-  size: 3
+  size: 1
   stemcell:
     name: bosh-warden-boshlite-ubuntu-trusty-go_agent
     version: latest
@@ -31,13 +31,17 @@ resource_pools:
 networks:
 - name: webapp-network
   subnets:
-  - range: 10.244.1.0/24
+  - range: 10.244.0.0/30
     reserved: 
-      - 10.244.1.0
-      - 10.244.1.255
-      - 10.244.1.1
+      - 10.244.0.1
     static:
-      - 10.244.1.10
+      - 10.244.0.2
+    cloud_properties:
+      name: random
+  - range: 10.244.0.4/30
+    reserved: 
+      - 10.244.0.5
+    static: []
     cloud_properties:
       name: random
 
@@ -49,10 +53,10 @@ jobs:
   networks:
     - name: webapp-network
       static_ips:
-        - 10.244.1.10
+        - 10.244.0.2
 
 properties:
   webapp:
     admin: foo@bar.com
-    servername: 10.244.1.10
+    servername: 10.244.0.2
 

@@ -1,1 +1,1 @@
-sudo apt-get update && sudo apt-get install vim git
+sudo apt-get update && sudo apt-get install -y vim git curl

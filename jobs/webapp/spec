@@ -2,8 +2,9 @@
 name: webapp
 
 templates:
-  webapp_ctl.erb:  bin/webapp_ctl
+  webapp_ctl.erb: bin/webapp_ctl
   httpd.conf.erb: config/httpd.conf
+  index.html.erb: htdocs/index.html
 
 packages:
   - apache2
@@ -18,4 +19,7 @@ properties:
   webapp.servername:
     description: Name of the virtual server
     default: 127.0.0.1
+  webapp.greeting:
+    description: Message that will be displayed by the deployed app
+    default: Hello, world!
 

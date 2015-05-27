@@ -108,7 +108,7 @@ ServerName <%= p("webapp.servername") %>
 # documents. By default, all requests are taken from this directory, but
 # symbolic links and aliases may be used to point to other locations.
 #
-DocumentRoot "/var/vcap/packages/apache2/htdocs"
+DocumentRoot "/var/vcap/jobs/webapp/htdocs"
 
 #
 # Each directory to which Apache has access can be configured with respect
@@ -135,7 +135,7 @@ DocumentRoot "/var/vcap/packages/apache2/htdocs"
 #
 # This should be changed to whatever you set DocumentRoot to.
 #
-<Directory "/var/vcap/packages/apache2/htdocs">
+<Directory "/var/vcap/jobs/webapp/htdocs">
     #
     # Possible values for the Options directive are "None", "All",
     # or any combination of:
