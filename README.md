@@ -30,27 +30,22 @@ If we are to learn how to operate a tool for managing clouds aren't we going to 
 So lets spin the thing up:
 
 ```
-git clone https://github.com/cloudfoundry/bosh-lite.git
-cd bosh-lite
-vagrant up
+$ git clone https://github.com/cloudfoundry/bosh-lite.git
+$ cd bosh-lite
+$ vagrant up
 ```
 
 The first spinup may take a while because `vagrant` will download an OS image from the internet. After the VM is ready
 ssh into it like this:
 
 ```
-vagrant ssh
+$ vagrant ssh
 ```
 
 bosh is pre-installed on this box, so run the following:
 
 ```
-bosh target
-```
-
-and you should see this:
-
-```
+$ bosh target
 Current target is https://127.0.0.1:25555 (Bosh Lite Director)
 ```
 
@@ -60,7 +55,7 @@ That's it - we have bosh, read on...
 Apart from bosh this is a surprisingly skinny VM, so we will need to install some tools:
 
 ```
-sudo apt-get update && sudo apt-get install -y vim git curl
+$ sudo apt-get update && sudo apt-get install -y vim git curl
 ```
 
 ### Generate a release scaffold
