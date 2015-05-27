@@ -219,17 +219,190 @@ check process webapp
 
 ```
 
-It tells monit what pid to watch for and it also points to the `webapp_ctl` script taht we created for lifecycle management of the server.
+It tells monit what pid to watch for and it also points to the `webapp_ctl` script that we created for lifecycle management of the server.
 
 ### Describe your deployment
+
+That's all there is to it! But it is just a relsease - a bunch of blueprints that tell bosh where to get what, how to compile it and how to run what it compiles. But in order to run any software we need resources like computers, networks and the like.
+We also need to tell bosh how many instances of which jobs to run. All these aspecs comprise a `bosh deployment`. A bosh deployment is described in (SURPRISE!) a bosh deployment manifest - a yml descriptor giving bosh all the necessary information to breathe life into a bosh release.
+
+Lets take a look at some key parts of the deployment descriptor.
+
+Bosh should know what releases will be involved in the deployment we are defining:
+
+```
+releases:
+- name: webapp
+  version: latest
+```
+
+We're keeping it simple and depend on only one release, but in real life this is rarely so.
+Another very impotant thing is declaring what jobs we intend to run in this deployment:
+
+```
+jobs:
+- name: webapp
+  template: webapp
+  instances: 1
+  resource_pool: common-resource-pool
+  networks:
+    - name: webapp-network
+      static_ips:
+        - 10.244.0.2
+```
+
+We want one instance of the webapp job we just defined. This job will be run on a VM from a resource pool called `common-resource-pool` and it will be on a static ip in a network called `webapp-network`. Because any software need to run on some machine in some network, right?
+
+But wait, what is this `common-resource-pool`? Where does this `webapp-network` come from? Well, these we need to define ourselves, so let's do it.
+
+First the resource pool:
+
+```
+resource_pools:
+- name: common-resource-pool
+  network: webapp-network
+  size: 1
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+  cloud_properties:
+    name: random
+```
+
+And here it is: a resource pool called `common-resource-pool` that is using the `webapp-network` (to be defined). We are telling bosh that any machine from this pool should be provisioned with a `stemcell` that we specify and we are saying that the pool has size 1. This is because we only have one job.
+
+Now let's see how a network is defined:
+
+```
+networks:
+- name: webapp-network
+  type: manual
+  subnets:
+  - range: 10.244.0.0/30
+    gateway: 10.244.0.1
+    static:
+      - 10.244.0.2
+    cloud_properties:
+      name: random
+  - range: 10.244.0.4/30
+    gateway: 10.244.0.5
+    static: []
+    cloud_properties:
+      name: random
+```
+
+Now that's scary! Well, not as much - it's more verbose than complex. What we are doing is the following: 
+- we declare there is one network called `webapp-network` and it has type `manual`. This means that we will define all subnets by hand.
+- we define several subnets. The rule we are following is that we have a separate subnet for every ip that we need in the deployment. Every subnet that we are defining has a network mask of 255.255.255.252 or 30 bits. This leaves only 4 addresses as follows (for example):
+  - 10.244.0.0 - this is the network address
+  - 10.244.0.1 - this is normally used as the gateway
+  - 10.244.0.2 - this is an ip address that bosh can use for something
+  - 10.244.0.3 - this is a broadcast address
+In the first subnet we are using 10.244.0.1 as the gateway and we tell bosh that we want one static ip (10.244.0.2). We assigned this static ip to the job, because we want it to be available on the same address on every start. In the second subnet we did not reserve any static ips which means that bosh will dynamically assign the ip 10.244.0.6 to whatever machine needs an ip. In our case this will be used for a bosh worker vm that does package compilation.
+
+Actually the compilation worker vms are also configured in the deployment manifest:
+
+```
+compilation:
+  workers: 1
+  network: webapp-network
+  reuse_compilation_vms: true
+  cloud_properties:
+    name: random
+```
+
+We need one worker that is on the same network that we defined for our app - hence the need for two subnets in our network definition. So one subnet goes to the job and one subnet goes to the compilation worker. Actually this pattern is not enforced - you are free to use one big subnet for both the jobs and the compilation workers.
+
+Note: You can find the complete deployment descriptor for this example [here](deployments/warden.yml). Take a look at it and place it under a directory called `deployments` in the release root.
+
+And that's it - we defined a deployment. Let's go play with it.
 
 ## Pull the trigger
 
 ### Upload stemcell
+
+First we need to give bosh the stemcell that we specified in the deployment manifest. Thie [bosh docs](http://bosh.io/docs/uploading-stemcells.html) do a great job explaining this
+
+```
+$ bosh download public stemcell bosh-stemcell-389-warden-boshlite-ubuntu-trusty-go_agent.tgz
+$ bosh upload stemcell bosh-stemcell-389-warden-boshlite-ubuntu-trusty-go_agent.tgz
+```
+
 ### Create & upload a development release
+
+Next we need to create a dev release and upload it to the director:
+
+```
+$ bosh create release --force
+$ bosh upload release 
+```
+
+You will be prompted for the name of the release
+
 ### Deploy
+
+Aaaand, action:
+
+```
+$ bosh deploy
+```
+
+After some time hopefully the deployment should succeed. And you will be able to access our server on the static ip we allocated:
+
+```
+$ curl 10.244.0.2
+<html><body><h1>Hello, world!</h1></body></html>
+```
+
+Hooray! But wait, this is boring - so much effort for one more of these 'Hello, world!' things.
 
 ## Customize the app
 
 ### Tweak some property
+
+Let's customize the message that we serve. Remember, we parametrized that. We only need to add one line to the deployment manifest (release remains untouched):
+
+```
+properties:
+  webapp:
+    greeting:   Luke, he is your father!
+    admin:      foo@bar.com
+    servername: 10.244.0.2
+```
+
 ### Redeploy
+
+Now that we changed the deployment we have to redeploy if we want it to take effect:
+
+```
+$ bosh deploy
+```
+
+Bosh will detect the changes that you made to the manifest and will ask your permission to redeploy:
+
+```
+Properties
+webapp
+  + greeting: Luke, he is your father!
+
+Please review all changes carefully
+
+Deploying
+---------
+Deployment name: `warden.yml'
+Director name: `Bosh Lite Director'
+Are you sure you want to deploy? (type 'yes' to continue): yes
+```
+
+And deployment is updated:
+
+```
+$ curl 10.244.0.2
+<html><body><h1>Luke, he is you father!</h1></body></html>
+```
+
+You can change all kinds of things this way. You can change network config, scale up your jobs by incrementing the instance count and many other cool things.
+
+## That's it
+
+That's all from this tutorial. I hope you find it helpful. You may want to check out the [bosh docs](http://bosh.io/docs/basic-workflow.html) that cover the basic workflow. Have fun!
