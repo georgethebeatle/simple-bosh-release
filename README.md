@@ -2,7 +2,7 @@
 
 ## What on earth is this?
 
-This is a very simple bosh relese for a static webpage hosted by `apache2` server. It has only one job and only one package. 
+This is a very simple bosh release for a static webpage hosted by `apache2` server. It has only one job and only one package. 
 This is as simple as it gets. You can only deploy it on bosh-lite, so you won't need to generate the deployment manifest and
 deal with complex parameter substitution and merging stubs and templates. 
 
