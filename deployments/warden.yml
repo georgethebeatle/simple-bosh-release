@@ -33,15 +33,13 @@ networks:
   type: manual
   subnets:
   - range: 10.244.0.0/30
-    reserved: 
-      - 10.244.0.1
+    gateway: 10.244.0.1
     static:
       - 10.244.0.2
     cloud_properties:
       name: random
   - range: 10.244.0.4/30
-    reserved: 
-      - 10.244.0.5
+    gateway: 10.244.0.5
     static: []
     cloud_properties:
       name: random
