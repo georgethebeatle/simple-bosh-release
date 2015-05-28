@@ -321,7 +321,7 @@ And that's it - we defined a deployment. Let's go play with it.
 
 ### Upload stemcell
 
-First we need to give bosh the stemcell that we specified in the deployment manifest. Thie [bosh docs](http://bosh.io/docs/uploading-stemcells.html) do a great job explaining this
+First we need to give bosh the stemcell that we specified in the deployment manifest. This [bosh docs](http://bosh.io/docs/uploading-stemcells.html) do a great job explaining this
 
 ```
 $ bosh download public stemcell bosh-stemcell-389-warden-boshlite-ubuntu-trusty-go_agent.tgz
