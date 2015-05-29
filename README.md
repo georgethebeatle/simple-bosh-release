@@ -18,9 +18,9 @@ If you are unfamiliar with `bosh` and its basic terminology and want to dig deep
 
 ## Let's build it!
 
-### Install vagrant
+### Install vagrant & Virtual Box
 
-We are going to spin up a virtual machine and do all the steps in it, so we will need [vagrant](https://www.vagrantup.com/) installed. You need to follow the inistructions for your platform on their [site](https://www.vagrantup.com/)
+We are going to spin up a virtual machine and do all the steps in it, so we will need [vagrant](https://www.vagrantup.com/) installed. You need to follow the inistructions for your platform on their [site](https://www.vagrantup.com/). Same goes for [Virtual Box](https://www.virtualbox.org/wiki/Downloads)
 
 ### Spin up your very own bosh-lite
 If we are to learn how to operate a tool for managing clouds aren't we going to need some expensive account on amazon on google or some other cloud provider? Not at all! Because we have `bosh-lite`.
