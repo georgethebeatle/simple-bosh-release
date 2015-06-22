@@ -398,7 +398,7 @@ And deployment is updated:
 
 ```
 $ curl 10.244.0.2
-<html><body><h1>Luke, he is you father!</h1></body></html>
+<html><body><h1>Luke, he is your father!</h1></body></html>
 ```
 
 You can change all kinds of things this way. You can change network config, scale up your jobs by incrementing the instance count and many other cool things.
