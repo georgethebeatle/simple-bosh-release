@@ -339,6 +339,12 @@ $ bosh upload release
 
 You will be prompted for the name of the release
 
+### Set the deployment
+
+```
+$ bosh deployment deployments/warden.yml
+```
+
 ### Deploy
 
 Aaaand, action:
