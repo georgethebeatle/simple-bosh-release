@@ -337,7 +337,7 @@ $ bosh create release --force
 $ bosh upload release 
 ```
 
-You will be prompted for the name of the release
+You will be prompted for the name of the release. You should provide `simple-bosh-release` as the name in order to match up with what we pointed to in the [deployment manifest](deployments/warden.yml)
 
 ### Set the deployment
 
