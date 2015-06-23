@@ -2,7 +2,7 @@ name: webapp-warden
 director_uuid: <%= `bosh status --uuid` %>
 
 releases:
-- name: webapp
+- name: simple-bosh-release
   version: latest
 
 compilation:

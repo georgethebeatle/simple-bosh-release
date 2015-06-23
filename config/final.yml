@@ -1,0 +1,6 @@
+---
+blobstore:
+  provider: local
+  options:
+    blobstore_path: /tmp/my-funky-blobstore
+final_name: my-funky-blobstore
