@@ -232,7 +232,7 @@ Bosh should know what releases will be involved in the deployment we are definin
 
 ```
 releases:
-- name: webapp
+- name: simple-bosh-release
   version: latest
 ```
 
