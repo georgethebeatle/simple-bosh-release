@@ -94,7 +94,7 @@ There is no restriction on the format of the sources, because the release also c
 ```
 mkdir src/apache2
 cd src/apache2
-wget http://apache.cbox.biz//httpd/httpd-2.2.29.tar.gz
+wget http://apache.cbox.biz/httpd/httpd-2.2.31.tar.gz
 ```
 
 ### Add the package
@@ -116,7 +116,7 @@ We have to fill in the `spec` file like this:
 name: apache2
 
 files:
-  - apache2/httpd-2.2.29.tar.gz
+  - apache2/httpd-2.2.31.tar.gz
 
 ```
 
@@ -128,11 +128,11 @@ And let's fill in the `packaging` script itself:
 set -e
 
 echo "Extracting apache httpd..."
-tar xzf apache2/httpd-2.2.29.tar.gz
+tar xzf apache2/httpd-2.2.31.tar.gz
 
 echo "Building apache httpd..."
 (
-    cd httpd-2.2.29
+    cd httpd-2.2.31
     ./configure \
     --prefix=${BOSH_INSTALL_TARGET} \
     --enable-so

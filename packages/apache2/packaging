@@ -2,11 +2,11 @@
 set -e
 
 echo "Extracting apache httpd..."
-tar xzf apache2/httpd-2.2.29.tar.gz
+tar xzf apache2/httpd-2.2.31.tar.gz
 
 echo "Building apache httpd..."
 (
-    cd httpd-2.2.29
+    cd httpd-2.2.31
     ./configure \
     --prefix=${BOSH_INSTALL_TARGET} \
     --enable-so
