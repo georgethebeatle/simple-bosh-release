@@ -1,0 +1,68 @@
+name: webapp-warden
+director_uuid: <%= `bosh status --uuid` %>
+
+releases:
+- name: simple-bosh-release
+  version: latest
+- name: route-registrar
+  version: latest
+
+compilation:
+  workers: 1
+  network: webapp-network
+  reuse_compilation_vms: true
+  cloud_properties:
+    name: random
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-240000
+  update_watch_time: 30000-600000
+  max_in_flight: 3
+
+resource_pools:
+- name: common-resource-pool
+  network: webapp-network
+  size: 1
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+  cloud_properties:
+    name: random
+
+networks:
+- name: webapp-network
+  type: manual
+  subnets:
+  - range: 10.244.1.0/24
+    gateway: 10.244.1.1
+    static:
+      - 10.244.1.2
+    cloud_properties:
+      name: random
+
+jobs:
+- name: webapp
+  templates:
+    - {name: webapp, release: simple-bosh-release}
+    - {name: route-registrar, release: route-registrar}
+  instances: 1
+  resource_pool: common-resource-pool
+  networks:
+    - name: webapp-network
+      static_ips:
+        - 10.244.1.2
+
+properties:
+  webapp:
+    admin: foo@bar.com
+    servername: 10.244.1.2
+  route_registrar:
+    external_host: "cflogs.bosh-lite.com"
+    port: 80
+    message_bus_servers:
+    - host: "10.244.0.6:4222"
+      user: "nats"
+      password: "nats"
+    health_checker:
+      name: webapp-healthcheck 
