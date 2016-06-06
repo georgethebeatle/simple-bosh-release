@@ -291,8 +291,8 @@ Now that's scary! Well, not as much - it's more verbose than complex. What we ar
 - we define a subnet. The subnet that we are defining has a network mask of 255.255.255.0 or 24 bits. This leaves only 256 addresses as follows (for example):
   - 10.244.1.0 - this is the network address
   - 10.244.1.1 - this is normally used as the gateway
-  - 10.244.1.2, 10.244.1.64 - those are ip addresses that bosh can use for something
-  - 10.244.1.3 - this is a broadcast address
+  - 10.244.1.2 to 10.244.1.254 - those are ip addresses that bosh can use for something
+  - 10.244.1.255 - this is a broadcast address
 In the subnet we are using 10.244.1.1 as the gateway and we tell bosh that we want one static ip (10.244.1.2). We assigned this static ip to the job, because we want it to be available on the same address on every start. Some of the IPs that are not listed as static will be used also during package compilation - BOSH will spin up a VM with a dynamic IP allocated from the specified range and compile the packages on those VMs.
 
 Actually the compilation worker vms are also configured in the deployment manifest:
