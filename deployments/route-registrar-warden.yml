@@ -58,7 +58,7 @@ properties:
     admin: foo@bar.com
     servername: 10.244.1.2
   route_registrar:
-    external_host: "cflogs.bosh-lite.com"
+    external_host: "webapp.bosh-lite.com"
     port: 80
     message_bus_servers:
     - host: "10.244.0.6:4222"
