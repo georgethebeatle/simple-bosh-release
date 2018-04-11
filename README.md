@@ -224,7 +224,7 @@ It tells monit what pid to watch for and it also points to the `webapp_ctl` scri
 ### Describe your deployment
 
 That's all there is to it! But it is just a relsease - a bunch of blueprints that tell bosh where to get what, how to compile it and how to run what it compiles. But in order to run any software we need resources like computers, networks and the like.
-We also need to tell bosh how many instances of which jobs to run. All these aspecs comprise a `bosh deployment`. A bosh deployment is described in (SURPRISE!) a bosh deployment manifest - a yml descriptor giving bosh all the necessary information to breathe life into a bosh release.
+We also need to tell bosh how many instances of which jobs to run. All these aspects comprise a `bosh deployment`. A bosh deployment is described in (SURPRISE!) a bosh deployment manifest - a yml descriptor giving bosh all the necessary information to breathe life into a bosh release.
 
 Lets take a look at some key parts of the deployment descriptor.
 
