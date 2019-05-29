@@ -5,6 +5,7 @@ templates:
   webapp_ctl.erb: bin/webapp_ctl
   httpd.conf.erb: config/httpd.conf
   index.html.erb: htdocs/index.html
+  pre-start.sh: bin/pre-start
 
 packages:
   - apache2
@@ -22,4 +23,3 @@ properties:
   webapp.greeting:
     description: Message that will be displayed by the deployed app
     default: Hello, world!
-

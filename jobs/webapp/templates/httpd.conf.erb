@@ -57,9 +57,28 @@ Listen <%= p("webapp.port") %>
 # <FilesMatch \.php$>
 #     SetHandler application/x-httpd-php
 # </FilesMatch>
+LoadModule authn_file_module modules/mod_authn_file.so
+LoadModule authn_core_module modules/mod_authn_core.so
+LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
+LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule access_compat_module modules/mod_access_compat.so
+LoadModule auth_basic_module modules/mod_auth_basic.so
+LoadModule reqtimeout_module modules/mod_reqtimeout.so
+LoadModule filter_module modules/mod_filter.so
+LoadModule mime_module modules/mod_mime.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule env_module modules/mod_env.so
+LoadModule headers_module modules/mod_headers.so
+LoadModule setenvif_module modules/mod_setenvif.so
+LoadModule version_module modules/mod_version.so
+LoadModule unixd_module modules/mod_unixd.so
+LoadModule status_module modules/mod_status.so
+LoadModule autoindex_module modules/mod_autoindex.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule alias_module modules/mod_alias.so
 
-<IfModule !mpm_netware_module>
-<IfModule !mpm_winnt_module>
 #
 # If you wish httpd to run as a different user or group, you must run
 # httpd as root initially and it will switch.
@@ -68,10 +87,9 @@ Listen <%= p("webapp.port") %>
 # It is usually good practice to create a dedicated user and group for
 # running httpd, as with most system services.
 #
-User vcap
-Group vcap
-
-</IfModule>
+<IfModule unixd_module>
+    User vcap
+    Group vcap
 </IfModule>
 
 # 'Main' server configuration
@@ -119,10 +137,8 @@ DocumentRoot "/var/vcap/jobs/webapp/htdocs"
 # features.
 #
 <Directory />
-    Options FollowSymLinks
     AllowOverride None
-    Order deny,allow
-    Deny from all
+    Require all denied
 </Directory>
 
 #
@@ -160,9 +176,7 @@ DocumentRoot "/var/vcap/jobs/webapp/htdocs"
     #
     # Controls who can get stuff from this server.
     #
-    Order allow,deny
-    Allow from all
-
+    Require all granted
 </Directory>
 
 #
@@ -178,9 +192,7 @@ DocumentRoot "/var/vcap/jobs/webapp/htdocs"
 # viewed by Web clients.
 #
 <FilesMatch "^\.ht">
-    Order allow,deny
-    Deny from all
-    Satisfy All
+    Require all denied
 </FilesMatch>
 
 #
@@ -274,8 +286,7 @@ LogLevel warn
 <Directory "/var/bosh/packages/apache/cgi-bin">
     AllowOverride None
     Options None
-    Order allow,deny
-    Allow from all
+    Require all granted
 </Directory>
 
 #
@@ -420,4 +431,3 @@ DefaultType text/plain
 SSLRandomSeed startup builtin
 SSLRandomSeed connect builtin
 </IfModule>
-
