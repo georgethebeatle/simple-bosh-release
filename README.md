@@ -201,11 +201,11 @@ Lets take a look at some key parts of the deployment descriptor `deployments/man
 Bosh should know what releases will be involved in the deployment we are defining:
 
 ```yaml
-name: simple-bosh
+name: simple-bosh-release
 director_uuid: <%= `bosh status --uuid` %>
 
 releases:
-- name: simple-bosh
+- name: simple-bosh-release
   version: latest
 ```
 
@@ -310,7 +310,7 @@ You will be prompted for the name of the release. You should provide `simple-bos
 Aaaand, action:
 
 ```bash
-$ bosh -d simple-bosh deploy deployments/manifest.yml
+$ bosh -d simple-bosh-release deploy deployments/manifest.yml
 ```
 Make sure you can ping the 10.243.1.2 address otherwise add the route rule to redirect traffic to 10.243.1.2 to the Virtual machine ip (suppose it is 192.168.50.6). Depending what OS run on your development machine you can add the following route rule.
 
@@ -349,7 +349,7 @@ properties:
 Now that we changed the deployment we have to redeploy if we want it to take effect:
 
 ```bash
-$ bosh -d simple-bosh deploy deployments/manifest.yml
+$ bosh -d simple-bosh-release deploy deployments/manifest.yml
 ```
 
 Bosh will detect the changes that you made to the manifest and will ask your permission to redeploy:
