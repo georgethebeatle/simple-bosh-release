@@ -9,19 +9,18 @@ APACHECTL=/var/vcap/packages/apache2/bin/apachectl
 APSTART=/var/vcap/sys/log/webapp/start.log
 
 case $1 in
-
-  start)
-    mkdir -p $RUN_DIR
-    mkdir -p $LOG_DIR
-
-    $APACHECTL -f $CONF_DIR/httpd.conf -k start >> $APSTART 2>&1
+    start)
+        mkdir -p $RUN_DIR
+        mkdir -p $LOG_DIR
+        $APACHECTL -f $CONF_DIR/httpd.conf -k start >>$APSTART 2>&1
     ;;
 
-  stop)
-    $APACHECTL -f $CONF_DIR/httpd.conf -k stop  >> $APSTART 2>&1
+    stop)
+        $APACHECTL -f $CONF_DIR/httpd.conf -k stop  >> $APSTART 2>&1
     ;;
 
-  *)
-  echo "Usage: ${JOB}_ctl {start|stop}" ;;
+    *)
+        echo "Usage: ${JOB}_ctl {start|stop}"
+    ;;
 esac
 exit 0
