@@ -220,7 +220,7 @@ jobs:
   networks:
     - name: webapp-network
       static_ips:
-        - 10.243.1.2
+        - 10.244.1.2
 ```
 
 We want one instance of the webapp job we just defined. This job will be run on a VM from a resource pool called `common-resource-pool` and it will be on a static ip in a network called `webapp-network`. Because any software need to run on some machine in some network, right?
@@ -250,10 +250,10 @@ networks:
 - name: webapp-network
   type: manual
   subnets:
-  - range: 10.243.1.0/24
-    gateway: 10.243.1.1
+  - range: 10.244.1.0/24
+    gateway: 10.244.1.1
     static:
-      - 10.243.1.2
+      - 10.244.1.2
     cloud_properties:
       name: random
 ```
@@ -261,11 +261,11 @@ networks:
 Now that's scary! Well, not as much - it's more verbose than complex. What we are doing is the following:
 - we declare there is one network called `webapp-network` and it has type `manual`. This means that we will define all subnets by hand.
 - we define a subnet. The subnet that we are defining has a network mask of 255.255.255.0 or 24 bits. This leaves only 256 addresses as follows (for example):
-  - 10.243.1.0 - this is the network address
-  - 10.243.1.1 - this is normally used as the gateway
-  - 10.243.1.2 to 10.243.1.254 - those are ip addresses that bosh can use for something
-  - 10.243.1.255 - this is a broadcast address
-In the subnet we are using 10.243.1.1 as the gateway and we tell bosh that we want one static ip (10.243.1.2). We assigned this static ip to the job, because we want it to be available on the same address on every start. Some of the IPs that are not listed as static will be used also during package compilation - BOSH will spin up a VM with a dynamic IP allocated from the specified range and compile the packages on those VMs.
+  - 10.244.1.0 - this is the network address
+  - 10.244.1.1 - this is normally used as the gateway
+  - 10.244.1.2 to 10.244.1.254 - those are ip addresses that bosh can use for something
+  - 10.244.1.255 - this is a broadcast address
+In the subnet we are using 10.244.1.1 as the gateway and we tell bosh that we want one static ip (10.244.1.2). We assigned this static ip to the job, because we want it to be available on the same address on every start. Some of the IPs that are not listed as static will be used also during package compilation - BOSH will spin up a VM with a dynamic IP allocated from the specified range and compile the packages on those VMs.
 
 Actually the compilation worker vms are also configured in the deployment manifest:
 
@@ -312,7 +312,7 @@ Aaaand, action:
 ```bash
 $ bosh -d simple-bosh-release deploy deployments/manifest.yml
 ```
-Make sure you can ping the 10.243.1.2 address otherwise add the route rule to redirect traffic to 10.243.1.2 to the Virtual machine ip (suppose it is 192.168.50.6). Depending what OS run on your development machine you can add the following route rule.
+Make sure you can ping the 10.244.1.2 address otherwise add the route rule to redirect traffic to 10.244.1.2 to the Virtual machine ip (suppose it is 192.168.50.6). Depending what OS run on your development machine you can add the following route rule.
 
 ```bash
 sudo route add -net 10.244.0.0/16     192.168.50.6 # Mac OS X
@@ -324,7 +324,7 @@ route add           10.244.0.0/16     192.168.50.6 # Windows
 After some time hopefully the deployment should succeed. And you will be able to access our server on the static ip we allocated:
 
 ```bash
-$ curl 10.243.1.2
+$ curl 10.244.1.2
 <html><body><h1>Hello, world!</h1></body></html>
 ```
 
@@ -341,7 +341,7 @@ properties:
   webapp:
     greeting:   Luke, he is your father!
     admin:      foo@bar.com
-    servername: 10.243.1.2
+    servername: 10.244.1.2
 ```
 
 ### Redeploy

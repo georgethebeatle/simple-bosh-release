@@ -32,10 +32,10 @@ networks:
 - name: webapp-network
   type: manual
   subnets:
-  - range: 10.243.1.0/24
-    gateway: 10.243.1.1
+  - range: 10.244.1.0/24
+    gateway: 10.244.1.1
     static:
-      - 10.243.1.2
+      - 10.244.1.2
     cloud_properties:
       name: random
 
@@ -47,9 +47,9 @@ jobs:
   networks:
     - name: webapp-network
       static_ips:
-        - 10.243.1.2
+        - 10.244.1.2
 
 properties:
   webapp:
     admin: foo@bar.com
-    servername: 10.243.1.2
+    servername: 10.244.1.2
