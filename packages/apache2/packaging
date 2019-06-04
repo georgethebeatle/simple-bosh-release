@@ -1,12 +1,32 @@
 set -e
 
-echo "Extracting apache httpd..."
+echo "Extracting apache httpd server ..."
 tar xzf apache2/httpd-2.4.39.tar.gz
 
-echo "Building apache httpd..."
-apt-get update
-apt-get install -y gcc make libapr1-dev libaprutil1-dev libpcre3-dev
-cd httpd-2.4.39
-./configure --prefix=${BOSH_INSTALL_TARGET} --enable-so
+echo "Extracting apache httpd server dependencies..."
+mkdir -p httpd-2.4.39/srclib/apr
+mkdir -p httpd-2.4.39/srclib/apr-util
+tar xzf apache2/apr-1.7.0.tar.gz -C httpd-2.4.39/srclib/apr --strip 1
+tar xzf apache2/apr-util-1.6.1.tar.gz -C httpd-2.4.39/srclib/apr-util --strip 1
+tar xzf apache2/pcre-8.43.tar.gz
+tar xjf apache2/expat-2.2.5.tar.bz2
+cp expat-2.2.5/lib/expat_external.h httpd-2.4.39/srclib/apr-util/include
+cp expat-2.2.5/lib/expat.h httpd-2.4.39/srclib/apr-util/include
+
+echo "Building apache httpd dependencies ..."
+cd pcre-8.43
+./configure --prefix=${BOSH_INSTALL_TARGET} --disable-cpp
+make
+make install
+cd ../expat-2.2.5
+./configure --prefix=${BOSH_INSTALL_TARGET}
+make
+make install
+
+echo "Building apache httpd ..."
+cd ../httpd-2.4.39
+./configure --prefix=${BOSH_INSTALL_TARGET} --enable-so --with-included-apr \
+    --with-included-apr-util --with-pcre=${BOSH_INSTALL_TARGET}/bin/pcre-config \
+    --with-expat=${BOSH_INSTALL_TARGET}
 make
 make install

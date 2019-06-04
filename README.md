@@ -56,12 +56,16 @@ Here are the most important of these:
 ### Add the sources
 
 Our release will need to run the apache http server so we will have to place the `apache2` sources in the `src/` folder.
-There is no restriction on the format of the sources, because the release also contains the packaging scripts that are responsible to transform these sources into runnable software. We are going to provide the `apache2` sources as a `.tar.gz` archive.
+There is no restriction on the format of the sources, because the release also contains the packaging scripts that are responsible to transform these sources into runnable software. We are going to provide the `apache2` sources as a `.tar.gz` and `.tar.bz2` archives.
 
 ```bash
 mkdir src/apache2
 cd src/apache2
 wget http://apache.cbox.biz/httpd/httpd-2.4.39.tar.gz
+wget http://mirror.nohup.it/apache/apr/apr-1.7.0.tar.gz
+wget http://mirror.nohup.it/apache/apr/apr-util-1.6.1.tar.gz
+wget https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz
+wget https://github.com/libexpat/libexpat/releases/download/R_2_2_5/expat-2.2.5.tar.bz2
 ```
 
 ### Add the package
@@ -85,8 +89,11 @@ We have to fill in the `spec` file like this:
 name: apache2
 
 files:
-  - apache2/httpd-2.4.39.tar.gz
-
+    - apache2/httpd-2.4.39.tar.gz
+    - apache2/apr-1.7.0.tar.gz
+    - apache2/apr-util-1.6.1.tar.gz
+    - apache2/pcre-8.43.tar.gz
+    - apache2/expat-2.2.5.tar.bz2
 ```
 
 It simply specifies what files should go in this package. We only need the archived sources of `apache2`
@@ -96,14 +103,34 @@ And let's fill in the `packaging` script itself:
 ```bash
 set -e
 
-echo "Extracting apache httpd..."
+echo "Extracting apache httpd server ..."
 tar xzf apache2/httpd-2.4.39.tar.gz
 
-echo "Building apache httpd..."
-apt-get update
-apt-get install -y gcc make libapr1-dev libaprutil1-dev libpcre3-dev
-cd httpd-2.4.39
-./configure --prefix=${BOSH_INSTALL_TARGET} --enable-so
+echo "Extracting apache httpd server dependencies..."
+mkdir -p httpd-2.4.39/srclib/apr
+mkdir -p httpd-2.4.39/srclib/apr-util
+tar xzf apache2/apr-1.7.0.tar.gz -C httpd-2.4.39/srclib/apr --strip 1
+tar xzf apache2/apr-util-1.6.1.tar.gz -C httpd-2.4.39/srclib/apr-util --strip 1
+tar xzf apache2/pcre-8.43.tar.gz
+tar xjf apache2/expat-2.2.5.tar.bz2
+cp expat-2.2.5/lib/expat_external.h httpd-2.4.39/srclib/apr-util/include
+cp expat-2.2.5/lib/expat.h httpd-2.4.39/srclib/apr-util/include
+
+echo "Building apache httpd dependencies ..."
+cd pcre-8.43
+./configure --prefix=${BOSH_INSTALL_TARGET} --disable-cpp
+make
+make install
+cd ../expat-2.2.5
+./configure --prefix=${BOSH_INSTALL_TARGET}
+make
+make install
+
+echo "Building apache httpd ..."
+cd ../httpd-2.4.39
+./configure --prefix=${BOSH_INSTALL_TARGET} --enable-so --with-included-apr \
+    --with-included-apr-util --with-pcre=${BOSH_INSTALL_TARGET}/bin/pcre-config \
+    --with-expat=${BOSH_INSTALL_TARGET}
 make
 make install
 ```
@@ -137,7 +164,6 @@ Our webapp job will be simply the apache `httpd` server serving some static cont
 - `webapp_ctl.erb` - for starting and stopping the server
 - `httpd.conf.erb` - for configuring the server
 - `index.html.erb` - for the html content that the server is going to serve
-- `pre-start.sh`   - for the packages to deploy as prerequisites 
 
 We may want to define properties for the port on which the server is going to listen for requests, the email of the webmaster, the server address and the content of the welcome html page.
 
@@ -151,7 +177,6 @@ templates:
   webapp_ctl.erb: bin/webapp_ctl
   httpd.conf.erb: config/httpd.conf
   index.html.erb: htdocs/index.html
-  pre-start.sh: bin/pre-start
 
 packages:
   - apache2
@@ -169,7 +194,6 @@ properties:
   webapp.greeting:
     description: Message that will be displayed by the deployed app
     default: Hello, world!
-
 ```
 
 We are declaring that we will be using the `apache2` package and we are listing all our templates providing the paths where bosh will place them after instantiating. These paths are relative to the jobs dir on the system being installed. Usually this is `/var/vcap/jobs/webapp`.

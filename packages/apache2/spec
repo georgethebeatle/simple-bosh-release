@@ -2,4 +2,8 @@
 name: apache2
 
 files:
+  - apache2/apr-1.7.0.tar.gz
+  - apache2/apr-util-1.6.1.tar.gz
   - apache2/httpd-2.4.39.tar.gz
+  - apache2/pcre-8.43.tar.gz
+  - apache2/expat-2.2.5.tar.bz2
