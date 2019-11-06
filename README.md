@@ -8,7 +8,7 @@ If you want to grasp the very basic things about `bosh` then read on - we will b
 
 ## What are you talkin' about?
 
-If you are unfamiliar with `bosh` and its basic terminology and want to dig deeper, [this](http://bosh.io/docs/about.html) may be a good place to start.
+If you are unfamiliar with `bosh` and its basic terminology and want to dig deeper, [this](http://bosh.io/docs) may be a good place to start.
 
 `bosh` is the cloud operator's swiss army knife - it is a tool that handles a software project's release, deployment and lifecycle management. It defines a `release` that is comprised of `jobs`, `packages` and `sources`. A `bosh release` is self contained and fully reproducible accross environments. The release depends on a `stemcell` that is an OS image that will be run on each VM (or container) that bosh creates. The `stemcell` encapsulates all external dependencies of a `bosh release`.
 
