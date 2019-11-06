@@ -226,60 +226,53 @@ Bosh should know what releases will be involved in the deployment we are definin
 
 ```yaml
 name: simple-bosh-release
-director_uuid: <%= `bosh status --uuid` %>
 
 releases:
 - name: simple-bosh-release
   version: latest
 ```
 
-We're keeping it simple and depend on only one release, but in real life this is rarely so. Another very important thing is declaring what jobs we intend to run in this deployment:
+We're keeping it simple and depend on only one release, but in real life this is rarely so. Another very important thing is declaring what jobs we intend to run in this deployment. This is done via a mapping between release jobs and instance groups:
 
 ```yaml
-jobs:
+ instance_groups:
 - name: webapp
-  template: webapp
+  azs: [z1, z2, z3]
   instances: 1
-  resource_pool: common-resource-pool
+  jobs:
+  - name: webapp
+    release: simple-bosh-release
+    properties:
+      webapp:
+        admin: foo@bar.com
+        servername: 10.244.1.2
+  stemcell: default
+  vm_type: default
   networks:
     - name: webapp-network
       static_ips:
         - 10.244.1.2
 ```
 
-We want one instance of the webapp job we just defined. This job will be run on a VM from a resource pool called `common-resource-pool` and it will be on a static ip in a network called `webapp-network`. Because any software need to run on some machine in some network, right?
+We want one instance of the webapp job we just defined. This job will be run on a VM and it will be on a static ip in a network called `webapp-network`. Because any software need to run on some machine in some network, right?
 
-But wait, what is this `common-resource-pool`? Where does this `webapp-network` come from? Well, these we need to define ourselves, so let's do it.
-
-First the resource pool:
-
-```yaml
-resource_pools:
-- name: common-resource-pool
-  network: webapp-network
-  size: 1
-  stemcell:
-    name: bosh-warden-boshlite-ubuntu-xenial-go_agent
-    version: latest
-  cloud_properties:
-    name: random
-```
-
-And here it is: a resource pool called `common-resource-pool` that is using the `webapp-network` (to be defined). We are telling bosh that any machine from this pool should be provisioned with a `stemcell` that we specify and we are saying that the pool has size 1. This is because we only have one job.
-
-Now let's see how a network is defined:
+But wait, where does this `webapp-network` come from? Well, that we need to define ourselves in a cloud config descriptor `deployments/cloud-config.yml`, so let's do it. Here is how a network is defined:
 
 ```yaml
 networks:
 - name: webapp-network
-  type: manual
   subnets:
-  - range: 10.244.1.0/24
+  - azs:
+    - z1
+    - z2
+    - z3
+    dns:
+    - 8.8.8.8
     gateway: 10.244.1.1
+    range: 10.244.1.0/24
     static:
-      - 10.244.1.2
-    cloud_properties:
-      name: random
+    - 10.244.1.2
+  type: manual
 ```
 
 Now that's scary! Well, not as much - it's more verbose than complex. What we are doing is the following:
@@ -291,20 +284,20 @@ Now that's scary! Well, not as much - it's more verbose than complex. What we ar
   - 10.244.1.255 - this is a broadcast address
 In the subnet we are using 10.244.1.1 as the gateway and we tell bosh that we want one static ip (10.244.1.2). We assigned this static ip to the job, because we want it to be available on the same address on every start. Some of the IPs that are not listed as static will be used also during package compilation - BOSH will spin up a VM with a dynamic IP allocated from the specified range and compile the packages on those VMs.
 
-Actually the compilation worker vms are also configured in the deployment manifest:
+Actually the compilation worker vms are also configured in the cloud config file:
 
 ```yaml
 compilation:
-  workers: 1
+  az: z1
   network: webapp-network
   reuse_compilation_vms: true
-  cloud_properties:
-    name: random
+  vm_type: default
+  workers: 5
 ```
 
 We need one worker that is on the same network that we defined for our app - hence the need for two subnets in our network definition. So one subnet goes to the job and one subnet goes to the compilation worker. Actually this pattern is not enforced - you are free to use one big subnet for both the jobs and the compilation workers.
 
-Note: You can find the complete deployment descriptor for this example [here](deployments/warden.yml). Take a look at it and place it under a directory called `deployments` in the release root.
+Note: You can find the complete deployment descriptor and cloud config for this example respectively [here](deployments/manifest.yml) and [here](deployments/cloud-config.yml) . Take a look at them and place them under a directory called `deployments` in the release root.
 
 And that's it - we defined a deployment. Let's go play with it.
 
@@ -327,7 +320,14 @@ $ bosh create-release --force
 $ bosh upload-release
 ```
 
-You will be prompted for the name of the release. You should provide `simple-bosh-release` as the name in order to match up with what we pointed to in the [deployment manifest](deployments/warden.yml)
+You will be prompted for the name of the release. You should provide `simple-bosh-release` as the name in order to match up with what we pointed to in the [deployment manifest](deployments/manifest.yml)
+
+### Update cloud config
+Before we finally deploy our release we will have to update the cloud config to reflect the needs of our deployment descriptor:
+
+```bash
+$ bosh update-cloud-config deployments/cloud-config.yml
+```
 
 ### Deploy
 
